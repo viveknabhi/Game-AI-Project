@@ -237,19 +237,20 @@ class MyAlienHero(class2):
 """
 
 ########################
+
+world = MOBAWorld(SEED, dims, dims, 0, 60)
+#world = GameWorld(SEED, dims, dims)
+agent = GhostAgent(AGENT, (600, 500), 1, SPEED, world)
+world.setPlayerAgent(agent)
+
+nav = AStarNavigator()
+#nav.setWorld(world)
+
+cellFactor = 3
+cellsize = agent.getRadius()*2.0
+bigCellsize = cellFactor*cellsize
+
 def generateMOBA(A):
-	world = MOBAWorld(SEED, dims, dims, 0, 60)
-	#world = GameWorld(SEED, dims, dims)
-	agent = GhostAgent(AGENT, (600, 500), 1, SPEED, world)
-	world.setPlayerAgent(agent)
-
-	nav = AStarNavigator()
-	#nav.setWorld(world)
-
-	cellFactor = 3
-	cellsize = agent.getRadius()*2.0
-	bigCellsize = cellFactor*cellsize
-
 	#getGameWorldObject(towerCount=6, baseCount=1, obstacleCount=3, x2list, y2list)
 	x2list, y2list = getGridCoordinates()
 	#A = generateMapRepresentation()

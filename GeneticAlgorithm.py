@@ -5,6 +5,8 @@ import random
 import time
 from copy import deepcopy
 import geneticHelper as GH
+from utils import *
+
 mapping = {'bases':1,'towers':2,'obstacles':0}
 
 #Initilized constants
@@ -24,14 +26,40 @@ class MapLayout:
 		s.towers = s.findCount(2)
 		s.obstacles = s.findCount(0)
 		s.bases = s.findCount(1)
+
+		s.towerIndices = s.findItems(2)
+		s.baseIndices = s.findItems(1)
+		#s.baseIndices.remove((0,0))
+
 		s.cost = s.computeMapFitness()
+
+	def findItems(s,item):
+		rows,cols = np.where(s.mapRep == item)
+		result = []
+		for i in zip(rows,cols):
+			result.append(i)
+
+		return result
 
 	def findCount(s,item):
 		return len([a for a in np.nditer(s.mapRep) if a == item])
 
 	def computeMapFitness(s):
-		score = s.towers * 5 + s.obstacles * 2
-		return abs(score - 25)
+		score = 0
+		score += (s.towers/10) * 5
+		score += (s.obstacles/15) * 5
+
+		groupDistance = 0
+		for base in s.baseIndices:
+			for tower in s.towerIndices:
+				groupDistance += distance(base,tower)
+
+		#score += (groupDistance/(distance((9,9),(1,1)) * 10)) * 20
+	
+		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 10
+
+
+		return abs(score - 9)
 
 
 
