@@ -237,54 +237,54 @@ class MyAlienHero(class2):
 """
 
 ########################
+def generateMOBA(A):
+	world = MOBAWorld(SEED, dims, dims, 0, 60)
+	#world = GameWorld(SEED, dims, dims)
+	agent = GhostAgent(AGENT, (600, 500), 1, SPEED, world)
+	world.setPlayerAgent(agent)
 
-world = MOBAWorld(SEED, dims, dims, 0, 60)
-#world = GameWorld(SEED, dims, dims)
-agent = GhostAgent(AGENT, (600, 500), 1, SPEED, world)
-world.setPlayerAgent(agent)
+	nav = AStarNavigator()
+	#nav.setWorld(world)
 
-nav = AStarNavigator()
-#nav.setWorld(world)
+	cellFactor = 3
+	cellsize = agent.getRadius()*2.0
+	bigCellsize = cellFactor*cellsize
 
-cellFactor = 3
-cellsize = agent.getRadius()*2.0
-bigCellsize = cellFactor*cellsize
-
-#getGameWorldObject(towerCount=6, baseCount=1, obstacleCount=3, x2list, y2list)
-x2list, y2list = getGridCoordinates()
-A = generateMapRepresentation()
-parseArrayRepresentation(A, x2list, y2list)
-#world.initializeTerrain(obstacles, (0, 0, 0), 4)
-
-
-agent.setNavigator(Navigator())
-agent.team = 0
-world.debugging = True
+	#getGameWorldObject(towerCount=6, baseCount=1, obstacleCount=3, x2list, y2list)
+	x2list, y2list = getGridCoordinates()
+	#A = generateMapRepresentation()
+	parseArrayRepresentation(A, x2list, y2list)
+	#world.initializeTerrain(obstacles, (0, 0, 0), 4)
 
 
-"""
-b1 = Base(BASE, (25, 25), world, 1, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
-b1.setNavigator(nav)
-world.addBase(b1)
-
-b2 = Base(BASE, (1075, 1075), world, 2, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
-b2.setNavigator(nav)
-world.addBase(b2)
-
-hero1 = MyHumanHero((125, 125), 0, world)
-hero1.setNavigator(cloneAStarNavigator(nav))
-hero1.team = 1
-world.addNPC(hero1)
-
-hero2 = MyAlienHero((1025, 1025), 0, world)
-hero2.setNavigator(cloneAStarNavigator(nav))
-hero2.team = 2
-world.addNPC(hero2)
-"""
-#world.makePotentialGates()
+	agent.setNavigator(Navigator())
+	agent.team = 0
+	world.debugging = True
 
 
-#hero1.start()
-#hero2.start()
+	"""
+	b1 = Base(BASE, (25, 25), world, 1, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
+	b1.setNavigator(nav)
+	world.addBase(b1)
 
-world.run()
+	b2 = Base(BASE, (1075, 1075), world, 2, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
+	b2.setNavigator(nav)
+	world.addBase(b2)
+
+	hero1 = MyHumanHero((125, 125), 0, world)
+	hero1.setNavigator(cloneAStarNavigator(nav))
+	hero1.team = 1
+	world.addNPC(hero1)
+
+	hero2 = MyAlienHero((1025, 1025), 0, world)
+	hero2.setNavigator(cloneAStarNavigator(nav))
+	hero2.team = 2
+	world.addNPC(hero2)
+	"""
+	#world.makePotentialGates()
+
+
+	#hero1.start()
+	#hero2.start()
+
+	world.run()

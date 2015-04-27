@@ -223,6 +223,7 @@ class GeneticAlgorithm:
 
 
 def GA():
+
 	cost = 0
 	random.seed(20)
 	np.random.seed(90)
