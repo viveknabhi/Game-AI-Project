@@ -299,7 +299,6 @@ class GeneticAlgorithm:
 			return val
 
 
-
 	#Generates 2 children by 1 point crossover
 	def crossover(s,p1,p2):
 		
@@ -380,10 +379,6 @@ class GeneticAlgorithm:
 		#print c1Dict,c2Dict
 
 		return child1,child2,c1Dict,c2Dict
-
-
-
-
 
 
 def GA():

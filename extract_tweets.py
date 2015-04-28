@@ -60,6 +60,7 @@ def getTweetsforUser(username,fileName):
 
 			if count > 2000:
 				return
+
 			print "started sleep at: ", time.ctime(), count
 			tweets = []
 			statuses = []

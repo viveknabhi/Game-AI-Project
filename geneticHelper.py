@@ -107,10 +107,10 @@ def modifyMapObstacles(mapRep):
 ###########################
 ### Minion Subclasses
 #BaselineMinion
-class MyHumanMinion(BaselineMinion):
+class MyHumanMinion(class1):
 	
 	def __init__(self, position, orientation, world, image = NPC, speed = SPEED, viewangle = 360, hitpoints = HITPOINTS, firerate = FIRERATE, bulletclass = SmallBullet):
-		BaselineMinion.__init__(self, position, orientation, world, image, speed, viewangle, hitpoints, firerate, bulletclass)
+		class1.__init__(self, position, orientation, world, image, speed, viewangle, hitpoints, firerate, bulletclass)
 
 
 """
@@ -144,14 +144,17 @@ class MyAlienHero(class2):
 
 class TweetMoba:
 	def __init__(s):
-
 		dims = (1200, 1200)
 		s.world = MOBAWorld(SEED, dims, dims, 2, 60)
 		#s.world = GameWorld(SEED, dims, dims)
-		s.agentTemp = Hero((25,25),0, s.world)
-		
+
+		#s.agent = GhostAgent(AGENT, (600, 500), 1, SPEED, s.world)
+		s.agent = Hero((SCREEN[0]/2, SCREEN[1]/2), 0, s.world)
+		s.agent.team = 0
+		s.world.setPlayerAgent(s.agent)
+
 		s.cellFactor = 3
-		s.cellsize = s.agentTemp.getRadius()*2.0
+		s.cellsize = s.agent.getRadius()*2.0
 		s.bigCellsize = s.cellFactor*s.cellsize
 
 		s.baseLocs = []
@@ -306,16 +309,6 @@ class TweetMoba:
 		#A = generateMapRepresentation()
 		s.parseArrayRepresentation(A, x2list, y2list)
 		#world.initializeTerrain(obstacles, (0, 0, 0), 4)
-
-
-
-		#s.agent = GhostAgent(AGENT, (600, 500), 1, SPEED, s.world)
-		i,j = s.baseLocs[0]
-
-		s.agent = Hero((i+100,j+100), 0, s.world)
-		s.agent.team = 1
-		s.world.setPlayerAgent(s.agent)
-
 
 		s.agent.setNavigator(Navigator())
 		s.world.debugging = True
