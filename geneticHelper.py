@@ -89,158 +89,17 @@ def generateMapRepresentationModified():
 
     return mapRep
 
-
-def createBase(image, position, world, team):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
-	b = Base(image, position, world, team)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
-	b.setNavigator(nav)
-	world.addBase(b)
-
-def createTower(location):
-	t = Tower(TOWER, location, world, 2)
-	world.addTower(t)
-
-def createObstacle(x,y,size):
-	val = cellFactor-1
-	offset = bigCellsize/2# - cellsize
-	topLeft = (x - offset, y - offset)
-	topRight = (x + size*bigCellsize + offset, y - offset)
-	bottomRight = (x + size*bigCellsize + offset, y + size*bigCellsize + offset)
-	bottomLeft = (x - offset, y + size*bigCellsize + offset)
-
-	obstacle = [topLeft, topRight, bottomRight, bottomLeft]
-	return obstacle
-
-def parseArrayRepresentation(A, x2list, y2list):
-	obstacles = []
-
-	gridPoints = [(x2,y2) for x2 in x2list for y2 in y2list]
-	for i,x in enumerate(x2list):
-		for j,y in enumerate(y2list):
-			if A[i,j] == 0:
-				obstacles.append(createObstacle(x,y,0))
-			elif A[i,j] == 1:
-				if i==0 and j==0:
-					createBase(BASE, (x, y), world, 1)#, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
-				else:
-					createBase(BASE, (x,y), world, 2)#, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
-			elif A[i,j] == 2:
-				createTower((x,y))
-	world.initializeTerrain(obstacles)
-
-def getGridCoordinates():
-	width, height = world.dimensions
-
-	x = cellsize
-	xlist = []
-	while(x<width):
-		xlist.append(x)
-		x+=cellsize
-
-	x2 = bigCellsize
-	x2list = []
-	while(x2<width):
-		x2list.append(x2)
-		x2+=bigCellsize
-
-	y = cellsize
-	ylist = []
-	while(y<height):
-		ylist.append(y)
-		y+=cellsize
-
-	y2 = bigCellsize
-	y2list = []
-	while(y2<height):
-		y2list.append(y2)
-		y2+=bigCellsize
-
-
-	#gridPoints = [(x,y) for x in xlist for y in ylist]
-	mainGridPoints = [(x2,y2) for x2 in x2list for y2 in y2list]
-	print len(x2list), len(y2list)
-	for point in mainGridPoints:
-		drawCross(world.debug, point)
-	
-	return x2list, y2list
-
-def getGameWorldObject(towerCount, baseCount, obstacleCount, x2list, y2list):
-
-	obstacles = []
-	count = 0
-	while count<obstacleCount:
-		obsX = random.choice(x2list[:-2])
-		obsY = random.choice(y2list[:-2])
-
-		val = cellFactor-1
-		offset = bigCellsize/2 - cellsize
-		topLeft = (obsX - offset, obsY - offset)
-		topRight = (obsX + 2*bigCellsize + offset, obsY - offset)
-		bottomRight = (obsX + 2*bigCellsize + offset, obsY + 2*bigCellsize + offset)
-		bottomLeft = (obsX - offset, obsY + 2*bigCellsize + offset)
-
-		obstacle = [topLeft, topRight, bottomRight, bottomLeft]
-		inside = False
-		for o in obstacles:
-			for point in obstacle:
-				if pointInsidePolygonPoints(point, o):
-					inside = True
-		if inside == False:
-			obstacles.append(obstacle)
-			count+=1
-
-	world.initializeTerrain(obstacles)
-
-	bases = []
-	count = 0
-	while count<baseCount:
-		baseX = random.choice(x2list)
-		baseY = random.choice(y2list)
-		inside = False
-		for o in obstacles:
-			if pointInsidePolygonPoints((baseX, baseY), o):
-				inside = True
-		if inside == False:
-			bases.append((baseX, baseY))
-			x2list.remove(baseX)
-			y2list.remove(baseY)
-			count+=1
-			b1 = Base(BASE, (baseX, baseY), world, 1)
-			b1.setNavigator(nav)
-			world.addBase(b1)
-
-
-	towers = []
-	count = 0
-	while count<towerCount:
-		towerX = random.choice(x2list)
-		towerY = random.choice(y2list)
-		inside = False
-		for o in obstacles:
-			if pointInsidePolygonPoints((towerX, towerY), o):
-				inside = True
-		if inside == False:
-			towers.append((towerX, towerY))
-			count+=1
-			t11 = Tower(TOWER, (towerX, towerY), world, 1)
-			world.addTower(t11)
-
-
-
-############################
-### SET UP WORLD
-
-dims = (1200, 1200)
-
-#obstacles = [[(250, 150), (600, 160), (590, 400), (260, 390)],
-#			 [(800, 170), (1040, 140), (1050, 160), (1040, 500), (810, 310)]]
-
-
-#mirror = map(lambda poly: map(lambda point: (dims[0]-point[0], dims[1]-point[1]), poly), obstacles)
-
-#obstacles = obstacles + mirror
-
-#obstacles = obstacles + [[(550, 570), (600, 550), (660, 570), (650, 630), (600, 650), (540, 630)]]
-
+def modifyMapObstacles(mapRep):
+	for i in xrange(mapRep.shape[0]):
+		for j in xrange(mapRep.shape[1]):
+			if mapRep[i,j] == 0:
+				if i+1<10 and mapRep[i+1][j]==3:
+					mapRep[i+1][j]=0
+				if i+1<10 and j+1<10 and mapRep[i+1][j+1]==3:
+					mapRep[i+1][j+1]=0
+				if j+1<10 and mapRep[i][j+1]==3:
+					mapRep[i][j+1]=0
+	return mapRep
 
 
 ###########################
@@ -273,54 +132,195 @@ class MyAlienHero(class2):
 
 ########################
 
-world = MOBAWorld(SEED, dims, dims, 0, 60)
-#world = GameWorld(SEED, dims, dims)
-agent = GhostAgent(AGENT, (600, 500), 1, SPEED, world)
-world.setPlayerAgent(agent)
 
-nav = AStarNavigator()
-#nav.setWorld(world)
+class TweetMoba:
+	def __init__(s):
+		dims = (1200, 1200)
+		s.world = MOBAWorld(SEED, dims, dims, 0, 60)
+		#world = GameWorld(SEED, dims, dims)
 
-cellFactor = 3
-cellsize = agent.getRadius()*2.0
-bigCellsize = cellFactor*cellsize
+		s.agent = GhostAgent(AGENT, (600, 500), 1, SPEED, s.world)
+		s.world.setPlayerAgent(s.agent)
 
-def generateMOBA(A):
-	#getGameWorldObject(towerCount=6, baseCount=1, obstacleCount=3, x2list, y2list)
-	x2list, y2list = getGridCoordinates()
-	#A = generateMapRepresentation()
-	parseArrayRepresentation(A, x2list, y2list)
-	#world.initializeTerrain(obstacles, (0, 0, 0), 4)
+		s.nav = AStarNavigator()
+		#nav.setWorld(world)
+
+		s.cellFactor = 3
+		s.cellsize = s.agent.getRadius()*2.0
+		s.bigCellsize = s.cellFactor*s.cellsize
+		
+
+	def createBase(s, image, position, team):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
+		b = Base(image, position, s.world, team)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
+		b.setNavigator(s.nav)
+		s.world.addBase(b)
+
+	def createTower(s, location):
+		t = Tower(TOWER, location, s.world, 2)
+		s.world.addTower(t)
+
+	def createObstacle(s, x, y, size):
+		offset = s.bigCellsize/2# - s.cellsize
+		topLeft = (x - offset, y - offset)
+		topRight = (x + size*s.bigCellsize + offset, y - offset)
+		bottomRight = (x + size*s.bigCellsize + offset, y + size*s.bigCellsize + offset)
+		bottomLeft = (x - offset, y + size*s.bigCellsize + offset)
+
+		obstacle = [topLeft, topRight, bottomRight, bottomLeft]
+		return obstacle
+
+	def parseArrayRepresentation(s, A, x2list, y2list):
+		obstacles = []
+
+		gridPoints = [(x2,y2) for x2 in x2list for y2 in y2list]
+		for i,x in enumerate(x2list):
+			for j,y in enumerate(y2list):
+				if A[i,j] == 0:
+					obstacles.append(s.createObstacle(x,y,0))
+				elif A[i,j] == 1:
+					if i==0 and j==0:
+						s.createBase(BASE, (x, y), 1)#, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
+					else:
+						s.createBase(BASE, (x,y), 2)#, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
+				elif A[i,j] == 2:
+					s.createTower((x,y))
+		s.world.initializeTerrain(obstacles)
+
+	def getGridCoordinates(s):
+		width, height = s.world.dimensions
+
+		x = s.cellsize
+		xlist = []
+		while(x<width):
+			xlist.append(x)
+			x+=s.cellsize
+
+		x2 = s.bigCellsize
+		x2list = []
+		while(x2<width):
+			x2list.append(x2)
+			x2+=s.bigCellsize
+
+		y = s.cellsize
+		ylist = []
+		while(y<height):
+			ylist.append(y)
+			y+=s.cellsize
+
+		y2 = s.bigCellsize
+		y2list = []
+		while(y2<height):
+			y2list.append(y2)
+			y2+=s.bigCellsize
 
 
-	agent.setNavigator(Navigator())
-	agent.team = 0
-	world.debugging = True
+		#gridPoints = [(x,y) for x in xlist for y in ylist]
+		mainGridPoints = [(x2,y2) for x2 in x2list for y2 in y2list]
+		print len(x2list), len(y2list)
+		for point in mainGridPoints:
+			drawCross(s.world.debug, point)
+		
+		return x2list, y2list
+
+	def getGameWorldObject(s, towerCount, baseCount, obstacleCount, x2list, y2list):
+
+		obstacles = []
+		count = 0
+		while count<obstacleCount:
+			obsX = random.choice(x2list[:-2])
+			obsY = random.choice(y2list[:-2])
+
+			val = cellFactor-1
+			offset = bigCellsize/2 - cellsize
+			topLeft = (obsX - offset, obsY - offset)
+			topRight = (obsX + 2*bigCellsize + offset, obsY - offset)
+			bottomRight = (obsX + 2*bigCellsize + offset, obsY + 2*bigCellsize + offset)
+			bottomLeft = (obsX - offset, obsY + 2*bigCellsize + offset)
+
+			obstacle = [topLeft, topRight, bottomRight, bottomLeft]
+			inside = False
+			for o in obstacles:
+				for point in obstacle:
+					if pointInsidePolygonPoints(point, o):
+						inside = True
+			if inside == False:
+				obstacles.append(obstacle)
+				count+=1
+
+		world.initializeTerrain(obstacles)
+
+		bases = []
+		count = 0
+		while count<baseCount:
+			baseX = random.choice(x2list)
+			baseY = random.choice(y2list)
+			inside = False
+			for o in obstacles:
+				if pointInsidePolygonPoints((baseX, baseY), o):
+					inside = True
+			if inside == False:
+				bases.append((baseX, baseY))
+				x2list.remove(baseX)
+				y2list.remove(baseY)
+				count+=1
+				b1 = Base(BASE, (baseX, baseY), world, 1)
+				b1.setNavigator(nav)
+				world.addBase(b1)
 
 
-	"""
-	b1 = Base(BASE, (25, 25), world, 1, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
-	b1.setNavigator(nav)
-	world.addBase(b1)
+		towers = []
+		count = 0
+		while count<towerCount:
+			towerX = random.choice(x2list)
+			towerY = random.choice(y2list)
+			inside = False
+			for o in obstacles:
+				if pointInsidePolygonPoints((towerX, towerY), o):
+					inside = True
+			if inside == False:
+				towers.append((towerX, towerY))
+				count+=1
+				t11 = Tower(TOWER, (towerX, towerY), world, 1)
+				world.addTower(t11)
 
-	b2 = Base(BASE, (1075, 1075), world, 2, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
-	b2.setNavigator(nav)
-	world.addBase(b2)
+	
 
-	hero1 = MyHumanHero((125, 125), 0, world)
-	hero1.setNavigator(cloneAStarNavigator(nav))
-	hero1.team = 1
-	world.addNPC(hero1)
+	def generateMOBA(s,A):
 
-	hero2 = MyAlienHero((1025, 1025), 0, world)
-	hero2.setNavigator(cloneAStarNavigator(nav))
-	hero2.team = 2
-	world.addNPC(hero2)
-	"""
-	#world.makePotentialGates()
+		#getGameWorldObject(towerCount=6, baseCount=1, obstacleCount=3, x2list, y2list)
+		x2list, y2list = s.getGridCoordinates()
+		#A = generateMapRepresentation()
+		s.parseArrayRepresentation(A, x2list, y2list)
+		#world.initializeTerrain(obstacles, (0, 0, 0), 4)
+
+		s.agent.setNavigator(Navigator())
+		s.agent.team = 0
+		s.world.debugging = True
 
 
-	#hero1.start()
-	#hero2.start()
+		"""
+		b1 = Base(BASE, (25, 25), world, 1, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
+		b1.setNavigator(nav)
+		world.addBase(b1)
 
-	world.run()
+		b2 = Base(BASE, (1075, 1075), world, 2, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
+		b2.setNavigator(nav)
+		world.addBase(b2)
+
+		hero1 = MyHumanHero((125, 125), 0, world)
+		hero1.setNavigator(cloneAStarNavigator(nav))
+		hero1.team = 1
+		world.addNPC(hero1)
+
+		hero2 = MyAlienHero((1025, 1025), 0, world)
+		hero2.setNavigator(cloneAStarNavigator(nav))
+		hero2.team = 2
+		world.addNPC(hero2)
+		"""
+		#world.makePotentialGates()
+
+
+		#hero1.start()
+		#hero2.start()
+
+		s.world.run()

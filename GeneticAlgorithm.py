@@ -4,6 +4,8 @@ import numpy as np
 import random
 import time
 from copy import deepcopy
+#import geneticHelper as GH
+from geneticHelper import *
 from utils import *
 
 mapping = {'bases':1,'towers':2,'obstacles':0}
@@ -316,5 +318,8 @@ def GA():
 	print layout.towers,layout.bases,layout.obstacles
 	import geneticHelper as GH
 	GH.generateMOBA(layout.mapRep)
+	#layout.mapRep = GH.modifyMapObstacles(layout.mapRep)
+	moba = TweetMoba()
+	moba.generateMOBA(layout.mapRep)
 
 GA()
