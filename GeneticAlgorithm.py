@@ -78,7 +78,7 @@ class MapLayout:
 		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 20
 
 
-		return abs(score - 27)
+		return abs(score - 8)
 
 
 

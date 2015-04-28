@@ -25,6 +25,8 @@ import numpy as np
 
 # nav = AStarNavigator()
 
+module1 = __import__("BaselineMinion")
+class1 = getattr(module1, "BaselineMinion")
 
 mapping = {'bases':1,'towers':2,'obstacles':0}
 
@@ -104,6 +106,13 @@ def modifyMapObstacles(mapRep):
 
 ###########################
 ### Minion Subclasses
+#BaselineMinion
+class MyHumanMinion(class1):
+	
+	def __init__(self, position, orientation, world, image = NPC, speed = SPEED, viewangle = 360, hitpoints = HITPOINTS, firerate = FIRERATE, bulletclass = SmallBullet):
+		class1.__init__(self, position, orientation, world, image, speed, viewangle, hitpoints, firerate, bulletclass)
+
+
 """
 class WanderingHumanMinion(WanderingMinion):
 	
@@ -136,21 +145,27 @@ class MyAlienHero(class2):
 class TweetMoba:
 	def __init__(s):
 		dims = (1200, 1200)
-		s.world = MOBAWorld(SEED, dims, dims, 0, 60)
-		#world = GameWorld(SEED, dims, dims)
+		s.world = MOBAWorld(SEED, dims, dims, 2, 60)
+		#s.world = GameWorld(SEED, dims, dims)
 
-		s.agent = GhostAgent(AGENT, (600, 500), 1, SPEED, s.world)
+		#s.agent = GhostAgent(AGENT, (600, 500), 1, SPEED, s.world)
+		s.agent = Hero((SCREEN[0]/2, SCREEN[1]/2), 0, s.world)
+		s.agent.team = 0
 		s.world.setPlayerAgent(s.agent)
-
-		s.nav = AStarNavigator()
 
 		s.cellFactor = 3
 		s.cellsize = s.agent.getRadius()*2.0
 		s.bigCellsize = s.cellFactor*s.cellsize
+
+		s.baseLocs = []
+		s.towerLocs = []
 		
 
-	def createBase(s, image, position, team):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
-		b = Base(image, position, s.world, team)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
+	def createBase(s, position):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
+		if position == (0,0):
+			b = Base(BASE, (25, 25), s.world, 1, MyHumanMinion)
+		else:
+			b = Base(BASE, position, s.world, 2)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
 		b.setNavigator(s.nav)
 		s.world.addBase(b)
 
@@ -178,11 +193,14 @@ class TweetMoba:
 					obstacles.append(s.createObstacle(x,y,0))
 				elif A[i,j] == 1:
 					if i==0 and j==0:
-						s.createBase(BASE, (x, y), 1)#, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
+						#s.createBase(BASE, (x, y), 1)#, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
+						s.baseLocs.append((x,y))
 					else:
-						s.createBase(BASE, (x,y), 2)#, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
+						s.baseLocs.append((x,y))
+						#s.createBase(BASE, (x,y), 2)#, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
 				elif A[i,j] == 2:
-					s.createTower((x,y))
+					s.towerLocs.append((x,y))
+					#s.createTower((x,y))
 		s.world.initializeTerrain(obstacles)
 
 	def getGridCoordinates(s):
@@ -293,7 +311,6 @@ class TweetMoba:
 		#world.initializeTerrain(obstacles, (0, 0, 0), 4)
 
 		s.agent.setNavigator(Navigator())
-		s.agent.team = 0
 		s.world.debugging = True
 
 
@@ -316,10 +333,15 @@ class TweetMoba:
 		hero2.team = 2
 		world.addNPC(hero2)
 		"""
-		#world.makePotentialGates()
+		#s.world.makePotentialGates()
 
+		s.nav = AStarNavigator()
+		s.nav.setWorld(s.world)
 
+		for location in s.baseLocs:
+			s.createBase(location)
+		for location in s.towerLocs:
+			s.createTower(location)
 		#hero1.start()
 		#hero2.start()
-		s.nav.setWorld(s.world)
 		s.world.run()
