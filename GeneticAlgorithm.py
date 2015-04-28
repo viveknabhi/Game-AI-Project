@@ -38,9 +38,13 @@ class MapLayout:
 		s.baseIndices = s.findItems(1)
 		#print s.baseIndices
 		try:
-			assert len(s.baseIndices) == 2
+			assert s.bases == 2
+			assert s.towers <= MAX_TOWER
+			assert s.obstacles <= MAX_OBSTACLE 
 		except:
+			print s.bases,s.towers,s.obstacles
 			print mapRep
+			raw_input()
 		#s.baseIndices.remove((0,0))
 
 		s.cost = s.computeMapFitness()
@@ -63,15 +67,18 @@ class MapLayout:
 
 		groupDistance = 0
 		for base in s.baseIndices:
+			if base == (0,0):
+				continue
+
 			for tower in s.towerIndices:
 				groupDistance += distance(base,tower)
 
 		#score += (groupDistance/(distance((9,9),(1,1)) * 10)) * 20
 	
-		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 10
+		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 20
 
 
-		return abs(score - 16)
+		return abs(score - 25)
 
 
 
@@ -105,6 +112,9 @@ class Population:
 		while len(elements) > 0:
 			key = random.choice(elements.keys())
 			elements[key] -= 1
+			# print elements
+			# print key
+			# raw_input()
 			if elements[key] == 0:
 				del elements[key]
 			for index in indices:
@@ -195,9 +205,11 @@ class GeneticAlgorithm:
 			i += 1
 			p1 = s.p.getCrossoverCandidate()
 			p2 = s.p.getCrossoverCandidate()
-			c1,c2 = s.crossover(p1,p2)
-			c1 = s.mutate(c1)
-			c2 = s.mutate(c2)
+			c1,c2,c1Dict,c2Dict = s.crossover(p1,p2)
+
+			c1 = s.mutate(c1,c1Dict)
+			c2 = s.mutate(c2,c2Dict)
+
 			mapLayoutObj1 = MapLayout(c1)
 			mapLayoutObj2 = MapLayout(c2)
 			newP.addTour(mapLayoutObj1)
@@ -208,7 +220,7 @@ class GeneticAlgorithm:
 
 
 	#Implementation of the 2-opt mutation
-	def mutate(s,layout):
+	def mutate(s,layout,cDict):
 		choiceArr = set([0,2,3])
 		for i in xrange(layout.shape[0]):
 			for j in xrange(layout.shape[1]):
@@ -216,7 +228,19 @@ class GeneticAlgorithm:
 					continue
 
 				if random.randint(1,100) < s.mutationRate:
-					layout[i][j] = random.choice(list(choiceArr - set([layout[i][j]])))
+					choice = random.choice(list(choiceArr - set([layout[i][j]])))
+
+					if choice in cDict:
+						if cDict[choice] > 0:
+							cDict[choice] -= 1
+						else:
+							continue
+
+					replaced = layout[i][j]
+					if replaced in cDict:
+						cDict[replaced] += 1
+
+					layout[i][j] = choice
 
 		return layout
 
@@ -226,7 +250,7 @@ class GeneticAlgorithm:
 
 		if countDict[val] == 0:
 			return 3
-		else:
+		elif countDict[val] > 0:
 			countDict[val] -= 1
 			return val
 
@@ -253,54 +277,65 @@ class GeneticAlgorithm:
 		c2Dict = {0:MAX_OBSTACLE,1:1,2:MAX_TOWER}
 
 		#uniform crossover
-		# length = len(indices)
-		# np.random.shuffle(indices)
-		# upper = indices[:int(length/2)]
-		# lower = indices[int(length/2):]
+		length = len(indices)
+		np.random.shuffle(indices)
+		upper = indices[:int(length/2)]
+		lower = indices[int(length/2):]
 
-		# for i,j in upper:
-		# 	v1 = s.checkUpperBounds(c1Dict,p1.mapRep[i][j])
-		# 	v2 = s.checkUpperBounds(c2Dict,p2.mapRep[i][j])
+		for i,j in upper:
+			v1 = s.checkUpperBounds(c1Dict,p1.mapRep[i][j])
+			v2 = s.checkUpperBounds(c2Dict,p2.mapRep[i][j])
 
-		# 	child1[i][j] = v1
-		# 	child2[i][j] = v2
 
-		# for i,j in lower:
-		# 	v1 = s.checkUpperBounds(c2Dict,p1.mapRep[i][j])
-		# 	v2 = s.checkUpperBounds(c1Dict,p2.mapRep[i][j])
+			# print c1Dict
+			# print p1.mapRep[i][j]
+			# raw_input()
 
-		# 	child1[i][j] = v2
-		# 	child2[i][j] = v1
+			child1[i][j] = v1
+			child2[i][j] = v2
+
+		for i,j in lower:
+			v1 = s.checkUpperBounds(c2Dict,p1.mapRep[i][j])
+			v2 = s.checkUpperBounds(c1Dict,p2.mapRep[i][j])
+
+			# print c1Dict
+			# print p2.mapRep[i][j]
+			# raw_input()
+
+			child1[i][j] = v2
+			child2[i][j] = v1
 
 		#1-point crossover
 		
-		crossCut = random.choice(indices)
-		boolVar = True
-		for i,j in indices:
-				if boolVar:
-					v1 = s.checkUpperBounds(c1Dict,p1.mapRep[i][j])
-					v2 = s.checkUpperBounds(c2Dict,p2.mapRep[i][j])
-					child1[i][j] = v1
-					child2[i][j] = v2
-				else:
-					v1 = s.checkUpperBounds(c2Dict,p1.mapRep[i][j])
-					v2 = s.checkUpperBounds(c1Dict,p2.mapRep[i][j])
-					child1[i][j] = v2
-					child2[i][j] = v1
+		# crossCut = random.choice(indices)
+		# boolVar = True
+		# for i,j in indices:
+		# 		if boolVar:
+		# 			v1 = s.checkUpperBounds(c1Dict,p1.mapRep[i][j])
+		# 			v2 = s.checkUpperBounds(c2Dict,p2.mapRep[i][j])
+		# 			child1[i][j] = v1
+		# 			child2[i][j] = v2
+		# 		else:
+		# 			v1 = s.checkUpperBounds(c2Dict,p1.mapRep[i][j])
+		# 			v2 = s.checkUpperBounds(c1Dict,p2.mapRep[i][j])
+		# 			child1[i][j] = v2
+		# 			child2[i][j] = v1
 		
 
 		#Check if both children have 2 bases
 		if c1Dict[1] == 1:
 			i,j = random.choice(enemyBases)
 			child1[i][j] = 1
+			c1Dict[1] -= 1
 
 		if c2Dict[1] == 1:
 			i,j = random.choice(enemyBases)
 			child2[i][j] = 1
+			c2Dict[1] -= 1
 
 		#print c1Dict,c2Dict
 
-		return child1,child2
+		return child1,child2,c1Dict,c2Dict
 
 
 
@@ -316,8 +351,6 @@ def GA():
 	cost,layout = ga.findGALayout(GA_ITERATIONS)
 	print layout,cost
 	print layout.towers,layout.bases,layout.obstacles
-	import geneticHelper as GH
-	GH.generateMOBA(layout.mapRep)
 	#layout.mapRep = GH.modifyMapObstacles(layout.mapRep)
 	moba = TweetMoba()
 	moba.generateMOBA(layout.mapRep)
