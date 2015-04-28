@@ -55,6 +55,41 @@ def generateMapRepresentation():
 
     return mapRep
 
+def generateMapRepresentationModified():
+    #Generate a map with 100 free Spaces
+    mapRep = np.empty((10,10))
+    mapRep.fill(3)
+    #Ensure first element of the map is always 1
+    mapRep[0][0] = 1
+
+    towerCount = random.randint(3,10)
+    obsCount = random.randint(8,15)
+
+    elements = {'bases':1,'towers':towerCount,'obstacles':obsCount}
+    indices = list(np.ndindex(mapRep.shape))
+    indices.pop(0)
+    np.random.shuffle(indices)
+
+    while len(elements) > 0:
+        key = random.choice(elements.keys())
+        elements[key] -= 1
+        if elements[key] == 0:
+            del elements[key]
+        for index in indices:
+            if mapRep[index[0]][index[1]] == 3:
+            	mapRep[index[0]][index[1]] = mapping[key]
+            	if key=='obstacles':
+                	if index[0]+1<10 and mapRep[index[0]+1][index[1]]==3:
+                		mapRep[index[0]+1][index[1]]=mapping[key]
+                	if index[0]+1<10 and index[1]+1<10 and mapRep[index[0]+1][index[1]+1]==3:
+                		mapRep[index[0]+1][index[1]+1]=mapping[key]
+                	if index[1]+1<10 and mapRep[index[0]][index[1]+1]==3:
+                		mapRep[index[0]][index[1]+1]=mapping[key]
+                break
+
+    return mapRep
+
+
 def createBase(image, position, world, team):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
 	b = Base(image, position, world, team)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
 	b.setNavigator(nav)
@@ -66,7 +101,7 @@ def createTower(location):
 
 def createObstacle(x,y,size):
 	val = cellFactor-1
-	offset = bigCellsize/2 - cellsize
+	offset = bigCellsize/2# - cellsize
 	topLeft = (x - offset, y - offset)
 	topRight = (x + size*bigCellsize + offset, y - offset)
 	bottomRight = (x + size*bigCellsize + offset, y + size*bigCellsize + offset)

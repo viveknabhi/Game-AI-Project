@@ -59,7 +59,7 @@ class MapLayout:
 		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 10
 
 
-		return abs(score - 9)
+		return abs(score - 19)
 
 
 
@@ -107,7 +107,8 @@ class Population:
 		i = 0
 		while i < s.maxSize:
 			i += 1
-			mapRep = s.generateMapRepresentation()
+			#mapRep = s.generateMapRepresentation()
+			mapRep = GH.generateMapRepresentationModified()
 			mapLayoutObj = MapLayout(mapRep)
 			s.addTour(mapLayoutObj)
 			s.size += 1
