@@ -129,13 +129,54 @@ class Population:
 
 		return mapRep
 
+	def generateMapRepresentationModified(s):
+		#Generate a map with 100 free Spaces
+		mapRep = np.empty((10,10))
+		mapRep.fill(3)
+		#Ensure first element of the map is always 1
+		mapRep[0][0] = 1
+
+		towerCount = random.randint(MIN_TOWER,MAX_TOWER)
+		obsCount = random.randint(MIN_OBSTACLE,MAX_OBSTACLE)
+
+		elements = {'bases':1,'towers':towerCount,'obstacles':obsCount}
+		indices = list(np.ndindex(mapRep.shape))
+		indices.pop(0)
+		np.random.shuffle(indices)
+
+		while len(elements) > 0:
+			key = random.choice(elements.keys())
+			elements[key] -= 1
+			if elements[key] == 0:
+				del elements[key]
+			for index in indices:
+				if mapRep[index[0]][index[1]] == 3:
+					mapRep[index[0]][index[1]] = mapping[key]
+					break
+			for index in indices:
+				if mapRep[index[0]][index[1]] == 3:
+					mapRep[index[0]][index[1]] = mapping[key]
+					if key=='obstacles':
+						if index[0]+1<10 and mapRep[index[0]+1][index[1]]==3:
+							mapRep[index[0]+1][index[1]]=mapping[key]
+						if index[0]+1<10 and index[1]+1<10 and mapRep[index[0]+1][index[1]+1]==3:
+							mapRep[index[0]+1][index[1]+1]=mapping[key]
+						if index[1]+1<10 and mapRep[index[0]][index[1]+1]==3:
+							mapRep[index[0]][index[1]+1]=mapping[key]
+					break
+
+		if 'bases' in elements:
+			i,j = random.choice(indices)
+			mapRep[i][j] = 1
+
+		return mapRep
 
 	def createPopulation(s):
 		i = 0
 		while i < s.maxSize:
 			i += 1
-			mapRep = s.generateMapRepresentation()
-			#mapRep = GH.generateMapRepresentationModified()
+			#mapRep = s.generateMapRepresentation()
+			mapRep = s.generateMapRepresentationModified()
 			mapLayoutObj = MapLayout(mapRep)
 			s.addTour(mapLayoutObj)
 			s.size += 1
@@ -351,6 +392,10 @@ def GA():
 	cost,layout = ga.findGALayout(GA_ITERATIONS)
 	print layout,cost
 	print layout.towers,layout.bases,layout.obstacles
+<<<<<<< HEAD
+=======
+	#GH.generateMOBA(layout.mapRep)
+>>>>>>> master
 	#layout.mapRep = GH.modifyMapObstacles(layout.mapRep)
 	moba = TweetMoba()
 	moba.generateMOBA(layout.mapRep)
