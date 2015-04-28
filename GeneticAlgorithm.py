@@ -4,7 +4,8 @@ import numpy as np
 import random
 import time
 from copy import deepcopy
-import geneticHelper as GH
+#import geneticHelper as GH
+from geneticHelper import *
 from utils import *
 
 mapping = {'bases':1,'towers':2,'obstacles':0}
@@ -108,7 +109,7 @@ class Population:
 		while i < s.maxSize:
 			i += 1
 			#mapRep = s.generateMapRepresentation()
-			mapRep = GH.generateMapRepresentationModified()
+			mapRep = generateMapRepresentationModified()
 			mapLayoutObj = MapLayout(mapRep)
 			s.addTour(mapLayoutObj)
 			s.size += 1
@@ -260,6 +261,8 @@ def GA():
 	cost,layout = ga.findGALayout(GA_ITERATIONS)
 	print layout,cost
 	print layout.towers,layout.bases,layout.obstacles
-	GH.generateMOBA(layout.mapRep)
+	#layout.mapRep = GH.modifyMapObstacles(layout.mapRep)
+	moba = TweetMoba()
+	moba.generateMOBA(layout.mapRep)
 
 GA()
