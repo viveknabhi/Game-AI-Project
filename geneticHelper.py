@@ -1,5 +1,5 @@
 import sys, pygame, math, random, time, copy
-from pygame.locals import * 
+from pygame.locals import *
 
 from agents import *
 from astarnavigator import *
