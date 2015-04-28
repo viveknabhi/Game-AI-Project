@@ -42,4 +42,4 @@ def processStatuses(statusFile,textFile):
     return corpus
 
 
-processStatuses('mobastatuses.p','mobastatuses.out')
+#processStatuses('DendiBoss.p','DendiBoss.out')

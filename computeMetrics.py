@@ -23,6 +23,8 @@ def computeSentiment(document):
 mobaData = ''
 user1Data = ''
 user2Data = ''
+user3Data = ''
+user4Data = ''
 
 with open ("data/mobastatuses.out", "r") as myfile:
     mobaData=myfile.read().replace('\n', '')
@@ -34,9 +36,13 @@ with open ("data/PurgeGamers.out", "r") as myfile:
     user2Data=myfile.read().replace('\n', '')
 
 with open ("data/tuxerman.out", "r") as myfile:
-    user2Data=myfile.read().replace('\n', '')
+    user3Data=myfile.read().replace('\n', '')
 
 
-documents = [mobaData,user1Data,user2Data]
+with open ("data/SUNSfanTV.out", "r") as myfile:
+    user4Data=myfile.read().replace('\n', '')
+
+
+documents = [mobaData,user1Data,user2Data,user3Data,user4Data]
 computeSimilarity(documents)
 
