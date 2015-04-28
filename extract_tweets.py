@@ -7,34 +7,73 @@ statuses = []
 tweets = []
 count = 0
 
-pickleFile = open("data/statuses.p",'wb')
-
-def main():
+def generateTweepyObject():
 	auth = tweepy.OAuthHandler(consumer_token, consumer_secret)
 	auth.set_access_token(key, secret)
 	api = tweepy.API(auth)
 	return api
 
-if __name__ == "__main__":
-	api = main()
 
-pageIterator = tweepy.Cursor(api.search, q='#dota2').pages()
+def getTweetsforTag(tag,fileName):
+	API = generateTweepyObject()
+	pageIterator = tweepy.Cursor(api.search, q=tag).pages()
+	pickleFile = open("data/" + fileName,'wb')
 
-while True:
-	try:
-		page = pageIterator.next()
-		for status in page:
+	while True:
+		try:
+			page = pageIterator.next()
+			for status in page:
+				if status.lang == 'en':
+					statuses.append(status)
+					tweets.append(status.text)
+		except:
+			cPickle.dump(statuses, pickleFile)
+			print "started sleep at: ", time.ctime(), count
+			tweets = []
+			statuses = []
+			time.sleep(100)
+
+
+def getTweetsforTag(tag,fileName):
+	API = generateTweepyObject()
+	pageIterator = tweepy.Cursor(api.search, q=tag).pages()
+	pickleFile = open("data/" + fileName,'wb')
+
+	while True:
+		try:
+			page = pageIterator.next()
+			for status in page:
+				if status.lang == 'en':
+					statuses.append(status)
+					tweets.append(status.text)
+					print status.text
+		except:
+			cPickle.dump(statuses, pickleFile)
+			print "started sleep at: ", time.ctime(), count
+			tweets = []
+			statuses = []
+			time.sleep(100)
+
+
+def getTweetsforUser(username,fileName):
+	API = generateTweepyObject()
+	statusIterator = tweepy.Cursor(api.user_timeline, id=username).items()
+	pickleFile = open("data/" + fileName,'wb')
+
+	while True:
+		try:
+			status = statusIterator.next()
 			if status.lang == 'en':
 				statuses.append(status)
 				tweets.append(status.text)
-	except:
-		cPickle.dump(statuses, pickleFile)
-		with open('dotaTweets.txt','a') as filename:
-			for tweet in tweets:
-				filename.write(tweet.encode('utf-8'))
-				filename.write('\n')
-		count += len(tweets)
-		print "started sleep at: ", time.ctime(), count
-		tweets = []
-		statuses = []
-		time.sleep(100)
+				print status.text
+		except:
+			cPickle.dump(statuses, pickleFile)
+			print "started sleep at: ", time.ctime(), count
+			tweets = []
+			statuses = []
+			time.sleep(100)
+
+
+
+getTweetsforUser('viveknabhi','viveknabhi.p')

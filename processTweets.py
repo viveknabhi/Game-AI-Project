@@ -23,18 +23,15 @@ def tok_tweet(tweet):
     tokens= tokenlist
     return ' '.join(tokens)
 
-def processStatuses():
+def processStatuses(statusFile,textFile):
     corpus = ''
-    statuses = cPickle.load(open('data/statuses.p'))
+    statuses = cPickle.load(open('data/' + statusFile))
     for status in statuses:
         if status.lang == 'en':
             tweet = tok_tweet(status.text)
             corpus += tweet + ' '
-    return corpus
 
-def main():
-    corpus = processStatuses()
-    return corpus
+    with open('data/'+textFile,'a') as outFile:
+        outFile.write(corpus)
 
-if __name__ == '__main__':
-    corpus = main()
+    return corpus
