@@ -12,7 +12,7 @@ mapping = {'bases':1,'towers':2,'obstacles':0}
 
 #Initilized constants
 POP_SIZE = 50
-GA_ITERATIONS = 100
+GA_ITERATIONS = 20
 MUTATION_RATE = 40
 adjMat = []
 trace_file_name = ''
