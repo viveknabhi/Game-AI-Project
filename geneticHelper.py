@@ -187,6 +187,27 @@ class TweetMoba:
 		obstacles = []
 
 		gridPoints = [(x2,y2) for x2 in x2list for y2 in y2list]
+
+		for i in xrange(len(x2list)):
+			for j in xrange(len(y2list)):
+				if A[i,j] == 1:
+					if j-1<10 and j-1>=0 and A[i,j-1]==0:
+						A[i,j-1] = 3
+					if i+1<10 and i+1>=0 and A[i+1,j]==0:
+						A[i+1,j] = 3
+					if j+1<10 and j+1>=0 and A[i,j+1]==0:
+						A[i,j+1] = 3
+					if i-1<10 and i-1>=0 and A[i-1,j]==0:
+						A[i-1,j] = 3
+					if j-1>=0 and i+1<10 and A[i+1,j-1]==0:
+						A[i+1,j-1] = 3
+					if i+1<10 and j+1<10 and A[i+1,j+1]==0:
+						A[i+1,j+1] = 3
+					if i-1>=0 and j+1<10 and A[i-1,j+1]==0:
+						A[i-1,j+1] = 3
+					if i-1>=0 and j-1>=0 and A[i-1,j-1]==0:
+						A[i-1,j-1] = 3
+
 		for i,x in enumerate(x2list):
 			for j,y in enumerate(y2list):
 				if A[i,j] == 0:
@@ -201,6 +222,7 @@ class TweetMoba:
 				elif A[i,j] == 2:
 					s.towerLocs.append((x,y))
 					#s.createTower((x,y))
+
 		s.world.initializeTerrain(obstacles)
 
 	def getGridCoordinates(s):
@@ -344,4 +366,5 @@ class TweetMoba:
 			s.createTower(location)
 		#hero1.start()
 		#hero2.start()
+
 		s.world.run()
