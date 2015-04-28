@@ -4,7 +4,6 @@ import numpy as np
 import random
 import time
 from copy import deepcopy
-import geneticHelper as GH
 from utils import *
 
 mapping = {'bases':1,'towers':2,'obstacles':0}
@@ -16,6 +15,12 @@ MUTATION_RATE = 15
 adjMat = []
 trace_file_name = ''
 elitism = True
+
+MIN_TOWER = 3
+MAX_TOWER = 12
+
+MIN_OBSTACLE = 15
+MAX_OBSTACLE = 25
 
 
 #Class for each tour
@@ -29,6 +34,11 @@ class MapLayout:
 
 		s.towerIndices = s.findItems(2)
 		s.baseIndices = s.findItems(1)
+		#print s.baseIndices
+		try:
+			assert len(s.baseIndices) == 2
+		except:
+			print mapRep
 		#s.baseIndices.remove((0,0))
 
 		s.cost = s.computeMapFitness()
@@ -46,8 +56,8 @@ class MapLayout:
 
 	def computeMapFitness(s):
 		score = 0
-		score += (s.towers/10) * 5
-		score += (s.obstacles/15) * 5
+		score += (s.towers/MAX_TOWER) * 5
+		score += (s.obstacles/MAX_OBSTACLE) * 5
 
 		groupDistance = 0
 		for base in s.baseIndices:
@@ -59,7 +69,7 @@ class MapLayout:
 		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 10
 
 
-		return abs(score - 19)
+		return abs(score - 16)
 
 
 
@@ -82,8 +92,8 @@ class Population:
 		#Ensure first element of the map is always 1
 		mapRep[0][0] = 1
 
-		towerCount = random.randint(3,10)
-		obsCount = random.randint(8,15)
+		towerCount = random.randint(MIN_TOWER,MAX_TOWER)
+		obsCount = random.randint(MIN_OBSTACLE,MAX_OBSTACLE)
 
 		elements = {'bases':1,'towers':towerCount,'obstacles':obsCount}
 		indices = list(np.ndindex(mapRep.shape))
@@ -100,6 +110,11 @@ class Population:
 					mapRep[index[0]][index[1]] = mapping[key]
 					break
 
+		if 'bases' in elements:
+			i,j = random.choice(indices)
+			mapRep[i][j] = 1
+
+
 		return mapRep
 
 
@@ -107,8 +122,8 @@ class Population:
 		i = 0
 		while i < s.maxSize:
 			i += 1
-			#mapRep = s.generateMapRepresentation()
-			mapRep = GH.generateMapRepresentationModified()
+			mapRep = s.generateMapRepresentation()
+			#mapRep = GH.generateMapRepresentationModified()
 			mapLayoutObj = MapLayout(mapRep)
 			s.addTour(mapLayoutObj)
 			s.size += 1
@@ -156,7 +171,7 @@ class GeneticAlgorithm:
 		while i < iters:
 			i += 1
 			s.p = s.generateNewPopulation()
-			print '******************** NEW population ****************************'	
+			print '******************** NEW population '+ str(i) +' ****************************'	
 			cost,tour = s.p.getBestCost()
 			#t = time.time()-t1
 			if cost < best:
@@ -184,6 +199,7 @@ class GeneticAlgorithm:
 			mapLayoutObj1 = MapLayout(c1)
 			mapLayoutObj2 = MapLayout(c2)
 			newP.addTour(mapLayoutObj1)
+			#print i
 			newP.addTour(mapLayoutObj2)
 
 		return newP
@@ -191,7 +207,6 @@ class GeneticAlgorithm:
 
 	#Implementation of the 2-opt mutation
 	def mutate(s,layout):
-
 		choiceArr = set([0,2,3])
 		for i in xrange(layout.shape[0]):
 			for j in xrange(layout.shape[1]):
@@ -203,46 +218,85 @@ class GeneticAlgorithm:
 
 		return layout
 
+	def checkUpperBounds(s,countDict,val):
+		if val == 3:
+			return 3
+
+		if countDict[val] == 0:
+			return 3
+		else:
+			countDict[val] -= 1
+			return val
+
+
 
 	#Generates 2 children by 1 point crossover
 	def crossover(s,p1,p2):
+		
 		indices = list(np.ndindex(p1.mapRep.shape))
+		indices.pop(0)
 		child1 = np.empty((10,10))
 		child1.fill(3)
 		child2 = np.empty((10,10))
 		child2.fill(3)
+
+		child1[0][0] = 1
+		child2[0][0] = 1
+
+		#print p1.baseIndices,p2.baseIndices
+		enemyBases = [x for x in p1.baseIndices if x != (0,0)] + [x for x in p2.baseIndices if x != (0,0)]
+		#print enemyBases
+
+		c1Dict = {0:MAX_OBSTACLE,1:1,2:MAX_TOWER}
+		c2Dict = {0:MAX_OBSTACLE,1:1,2:MAX_TOWER}
+
+		#uniform crossover
+		# length = len(indices)
+		# np.random.shuffle(indices)
+		# upper = indices[:int(length/2)]
+		# lower = indices[int(length/2):]
+
+		# for i,j in upper:
+		# 	v1 = s.checkUpperBounds(c1Dict,p1.mapRep[i][j])
+		# 	v2 = s.checkUpperBounds(c2Dict,p2.mapRep[i][j])
+
+		# 	child1[i][j] = v1
+		# 	child2[i][j] = v2
+
+		# for i,j in lower:
+		# 	v1 = s.checkUpperBounds(c2Dict,p1.mapRep[i][j])
+		# 	v2 = s.checkUpperBounds(c1Dict,p2.mapRep[i][j])
+
+		# 	child1[i][j] = v2
+		# 	child2[i][j] = v1
+
+		#1-point crossover
+		
 		crossCut = random.choice(indices)
 		boolVar = True
-		baseC1 = 2
-		baseC2 = 2
-		for i in xrange(p1.mapRep.shape[0]):
-			for j in xrange(p1.mapRep.shape[1]):
-				v1 = p1.mapRep[i][j]
-				v2 = p2.mapRep[i][j]
-
+		for i,j in indices:
 				if boolVar:
-					if v1 == 1:
-						baseC1 -= 1
-					if v2 == 1:
-						baseC2 -= 1
-
+					v1 = s.checkUpperBounds(c1Dict,p1.mapRep[i][j])
+					v2 = s.checkUpperBounds(c2Dict,p2.mapRep[i][j])
 					child1[i][j] = v1
 					child2[i][j] = v2
 				else:
-					if v1 == 1:
-						if baseC2 ==0:
-							v1 = 3
-						else:
-							baseC2 -= 1
-
-					if v2 == 1:
-						if baseC1 == 0:
-							v2 = 3
-						else:
-							baseC1 -= 1
-
+					v1 = s.checkUpperBounds(c2Dict,p1.mapRep[i][j])
+					v2 = s.checkUpperBounds(c1Dict,p2.mapRep[i][j])
 					child1[i][j] = v2
 					child2[i][j] = v1
+		
+
+		#Check if both children have 2 bases
+		if c1Dict[1] == 1:
+			i,j = random.choice(enemyBases)
+			child1[i][j] = 1
+
+		if c2Dict[1] == 1:
+			i,j = random.choice(enemyBases)
+			child2[i][j] = 1
+
+		#print c1Dict,c2Dict
 
 		return child1,child2
 
@@ -260,6 +314,7 @@ def GA():
 	cost,layout = ga.findGALayout(GA_ITERATIONS)
 	print layout,cost
 	print layout.towers,layout.bases,layout.obstacles
+	import geneticHelper as GH
 	GH.generateMOBA(layout.mapRep)
 
 GA()
