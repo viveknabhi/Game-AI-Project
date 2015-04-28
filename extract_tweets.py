@@ -2,10 +2,8 @@ import tweepy
 import cPickle
 import time
 from configFile import *
+from processTweets import *
 
-statuses = []
-tweets = []
-count = 0
 
 def generateTweepyObject():
 	auth = tweepy.OAuthHandler(consumer_token, consumer_secret)
@@ -19,25 +17,9 @@ def getTweetsforTag(tag,fileName):
 	pageIterator = tweepy.Cursor(api.search, q=tag).pages()
 	pickleFile = open("data/" + fileName,'wb')
 
-	while True:
-		try:
-			page = pageIterator.next()
-			for status in page:
-				if status.lang == 'en':
-					statuses.append(status)
-					tweets.append(status.text)
-		except:
-			cPickle.dump(statuses, pickleFile)
-			print "started sleep at: ", time.ctime(), count
-			tweets = []
-			statuses = []
-			time.sleep(100)
-
-
-def getTweetsforTag(tag,fileName):
-	API = generateTweepyObject()
-	pageIterator = tweepy.Cursor(api.search, q=tag).pages()
-	pickleFile = open("data/" + fileName,'wb')
+	statuses = []
+	tweets = []
+	count = 0
 
 	while True:
 		try:
@@ -46,7 +28,6 @@ def getTweetsforTag(tag,fileName):
 				if status.lang == 'en':
 					statuses.append(status)
 					tweets.append(status.text)
-					print status.text
 		except:
 			cPickle.dump(statuses, pickleFile)
 			print "started sleep at: ", time.ctime(), count
@@ -56,9 +37,13 @@ def getTweetsforTag(tag,fileName):
 
 
 def getTweetsforUser(username,fileName):
-	API = generateTweepyObject()
+	api = generateTweepyObject()
 	statusIterator = tweepy.Cursor(api.user_timeline, id=username).items()
 	pickleFile = open("data/" + fileName,'wb')
+
+	statuses = []
+	tweets = []
+	count = 0
 
 	while True:
 		try:
@@ -67,8 +52,15 @@ def getTweetsforUser(username,fileName):
 				statuses.append(status)
 				tweets.append(status.text)
 				print status.text
+				count += 1
 		except:
 			cPickle.dump(statuses, pickleFile)
+			if count < 100:
+				return
+
+			if count > 3000:
+				return
+
 			print "started sleep at: ", time.ctime(), count
 			tweets = []
 			statuses = []
@@ -76,4 +68,6 @@ def getTweetsforUser(username,fileName):
 
 
 
-getTweetsforUser('viveknabhi','viveknabhi.p')
+username = 'tuxerman'
+getTweetsforUser(username,username+'.p')
+processStatuses(username+'.p',username+'.out')
