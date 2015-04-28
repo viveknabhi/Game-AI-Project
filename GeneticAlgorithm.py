@@ -13,7 +13,7 @@ mapping = {'bases':1,'towers':2,'obstacles':0}
 #Initilized constants
 POP_SIZE = 50
 GA_ITERATIONS = 100
-MUTATION_RATE = 15
+MUTATION_RATE = 40
 adjMat = []
 trace_file_name = ''
 elitism = True
@@ -62,8 +62,8 @@ class MapLayout:
 
 	def computeMapFitness(s):
 		score = 0
-		score += (s.towers/MAX_TOWER) * 5
-		score += (s.obstacles/MAX_OBSTACLE) * 5
+		score += (s.towers/MAX_TOWER) * 8
+		score += (s.obstacles/MAX_OBSTACLE) * 2
 
 		groupDistance = 0
 		for base in s.baseIndices:
@@ -78,7 +78,7 @@ class MapLayout:
 		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 20
 
 
-		return abs(score - 25)
+		return abs(score - 27)
 
 
 
@@ -147,22 +147,24 @@ class Population:
 		while len(elements) > 0:
 			key = random.choice(elements.keys())
 			elements[key] -= 1
-			if elements[key] == 0:
+			if elements[key] <= 0:
 				del elements[key]
 			for index in indices:
 				if mapRep[index[0]][index[1]] == 3:
 					mapRep[index[0]][index[1]] = mapping[key]
-					break
-			for index in indices:
-				if mapRep[index[0]][index[1]] == 3:
-					mapRep[index[0]][index[1]] = mapping[key]
-					if key=='obstacles':
-						if index[0]+1<10 and mapRep[index[0]+1][index[1]]==3:
+					if key=='obstacles' and key in elements:
+						if index[0]+1<10 and mapRep[index[0]+1][index[1]]==3 and elements[key] > 0:
 							mapRep[index[0]+1][index[1]]=mapping[key]
-						if index[0]+1<10 and index[1]+1<10 and mapRep[index[0]+1][index[1]+1]==3:
+							elements[key] -= 1
+						if index[0]+1<10 and index[1]+1<10 and mapRep[index[0]+1][index[1]+1]==3  and elements[key] > 0:
 							mapRep[index[0]+1][index[1]+1]=mapping[key]
-						if index[1]+1<10 and mapRep[index[0]][index[1]+1]==3:
+							elements[key] -= 1
+						if index[1]+1<10 and mapRep[index[0]][index[1]+1]==3  and elements[key] > 0:
 							mapRep[index[0]][index[1]+1]=mapping[key]
+							elements[key] -= 1
+
+						if elements[key] <= 0:
+							del elements[key]							
 					break
 
 		if 'bases' in elements:
@@ -174,6 +176,7 @@ class Population:
 	def createPopulation(s):
 		i = 0
 		while i < s.maxSize:
+			print i
 			i += 1
 			#mapRep = s.generateMapRepresentation()
 			mapRep = s.generateMapRepresentationModified()
@@ -392,10 +395,6 @@ def GA():
 	cost,layout = ga.findGALayout(GA_ITERATIONS)
 	print layout,cost
 	print layout.towers,layout.bases,layout.obstacles
-<<<<<<< HEAD
-=======
-	#GH.generateMOBA(layout.mapRep)
->>>>>>> master
 	#layout.mapRep = GH.modifyMapObstacles(layout.mapRep)
 	moba = TweetMoba()
 	moba.generateMOBA(layout.mapRep)
