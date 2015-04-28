@@ -143,7 +143,6 @@ class TweetMoba:
 		s.world.setPlayerAgent(s.agent)
 
 		s.nav = AStarNavigator()
-		#nav.setWorld(world)
 
 		s.cellFactor = 3
 		s.cellsize = s.agent.getRadius()*2.0
@@ -322,5 +321,5 @@ class TweetMoba:
 
 		#hero1.start()
 		#hero2.start()
-
+		s.nav.setWorld(s.world)
 		s.world.run()
