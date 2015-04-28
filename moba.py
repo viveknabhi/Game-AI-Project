@@ -316,7 +316,8 @@ class Base(Mover):
 		if self.buildTimer >= self.buildRate:
 			for x in range(SPAWNNUM):
 				angle = corerandom.randint(0, 360)
-				self.spawnNPC(self.minionType, angle)
+				if self.minionType != None:
+					self.spawnNPC(self.minionType, angle)
 			self.buildTimer = 0
 		if self.canfire == False:
 			self.firetimer = self.firetimer + 1
@@ -350,7 +351,8 @@ class Base(Mover):
 				break
 		if hero == None:
 			# spawn new hero
-			self.spawnNPC(self.heroType)
+			if self.heroType != None:
+				self.spawnNPC(self.heroType)
 
 	def damage(self, amount):
 		if len(self.world.getTowersForTeam(self.getTeam())) == 0:

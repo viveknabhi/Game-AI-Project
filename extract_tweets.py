@@ -58,7 +58,7 @@ def getTweetsforUser(username,fileName):
 			if count < 100:
 				return
 
-			if count > 3000:
+			if count > 2000:
 				return
 
 			print "started sleep at: ", time.ctime(), count
@@ -68,6 +68,6 @@ def getTweetsforUser(username,fileName):
 
 
 
-username = 'tuxerman'
+username = 'SUNSfanTV'
 getTweetsforUser(username,username+'.p')
 processStatuses(username+'.p',username+'.out')

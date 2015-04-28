@@ -12,7 +12,7 @@ mapping = {'bases':1,'towers':2,'obstacles':0}
 
 #Initilized constants
 POP_SIZE = 50
-GA_ITERATIONS = 20
+GA_ITERATIONS = 5
 MUTATION_RATE = 40
 adjMat = []
 trace_file_name = ''
@@ -67,18 +67,18 @@ class MapLayout:
 
 		groupDistance = 0
 		for base in s.baseIndices:
-			if base == (0,0):
+			if base != (0,0):
 				continue
 
 			for tower in s.towerIndices:
 				groupDistance += distance(base,tower)
 
-		#score += (groupDistance/(distance((9,9),(1,1)) * 10)) * 20
+		score += (groupDistance/(distance((9,9),(1,1)) * 10)) * 100
 	
 		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 20
 
 
-		return abs(score - 8)
+		return abs(score - 113)
 
 
 

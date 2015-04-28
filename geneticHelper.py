@@ -9,7 +9,7 @@ from core import *
 from moba import *
 #from MyHero import *
 from utils import *
-from WanderingMinion import *
+from BaselineMinion import *
 
 from itertools import combinations
 import numpy as np
@@ -25,8 +25,8 @@ import numpy as np
 
 # nav = AStarNavigator()
 
-module1 = __import__("BaselineMinion")
-class1 = getattr(module1, "BaselineMinion")
+#module1 = __import__("BaselineMinion")
+#class1 = getattr(module1, "BaselineMinion")
 
 mapping = {'bases':1,'towers':2,'obstacles':0}
 
@@ -162,10 +162,10 @@ class TweetMoba:
 		
 
 	def createBase(s, position):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
-		if position == (0,0):
-			b = Base(BASE, (25, 25), s.world, 1, MyHumanMinion)
+		if position == (25,25):
+			b = Base(BASE, position, s.world, 1, MyHumanMinion)
 		else:
-			b = Base(BASE, position, s.world, 2)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
+			b = Base(BASE, position, s.world, 2, heroType = None, minionType = None)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
 		b.setNavigator(s.nav)
 		s.world.addBase(b)
 
@@ -187,27 +187,6 @@ class TweetMoba:
 		obstacles = []
 
 		gridPoints = [(x2,y2) for x2 in x2list for y2 in y2list]
-
-		for i in xrange(len(x2list)):
-			for j in xrange(len(y2list)):
-				if A[i,j] == 1:
-					if j-1<10 and j-1>=0 and A[i,j-1]==0:
-						A[i,j-1] = 3
-					if i+1<10 and i+1>=0 and A[i+1,j]==0:
-						A[i+1,j] = 3
-					if j+1<10 and j+1>=0 and A[i,j+1]==0:
-						A[i,j+1] = 3
-					if i-1<10 and i-1>=0 and A[i-1,j]==0:
-						A[i-1,j] = 3
-					if j-1>=0 and i+1<10 and A[i+1,j-1]==0:
-						A[i+1,j-1] = 3
-					if i+1<10 and j+1<10 and A[i+1,j+1]==0:
-						A[i+1,j+1] = 3
-					if i-1>=0 and j+1<10 and A[i-1,j+1]==0:
-						A[i-1,j+1] = 3
-					if i-1>=0 and j-1>=0 and A[i-1,j-1]==0:
-						A[i-1,j-1] = 3
-
 		for i,x in enumerate(x2list):
 			for j,y in enumerate(y2list):
 				if A[i,j] == 0:
@@ -215,15 +194,14 @@ class TweetMoba:
 				elif A[i,j] == 1:
 					if i==0 and j==0:
 						#s.createBase(BASE, (x, y), 1)#, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
-						s.baseLocs.append((x,y))
+						s.baseLocs.append((25,25))
 					else:
 						s.baseLocs.append((x,y))
 						#s.createBase(BASE, (x,y), 2)#, WanderingAlienMinion, MyAlienHero, BUILDRATE, 1000)
 				elif A[i,j] == 2:
 					s.towerLocs.append((x,y))
 					#s.createTower((x,y))
-
-		s.world.initializeTerrain(obstacles)
+		s.world.initializeTerrain(obstacles,color=(255,255,255),sprite=TREE)
 
 	def getGridCoordinates(s):
 		width, height = s.world.dimensions
@@ -355,7 +333,7 @@ class TweetMoba:
 		hero2.team = 2
 		world.addNPC(hero2)
 		"""
-		#s.world.makePotentialGates()
+		s.world.makePotentialGates()
 
 		s.nav = AStarNavigator()
 		s.nav.setWorld(s.world)
@@ -366,5 +344,4 @@ class TweetMoba:
 			s.createTower(location)
 		#hero1.start()
 		#hero2.start()
-
 		s.world.run()
