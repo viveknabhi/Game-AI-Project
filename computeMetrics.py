@@ -29,7 +29,8 @@ def computeSentiment(document):
 			#neu += updatedSenti[word]['neuScore']
 			count += 1
 		else:
-			print word
+			pass
+			#print word
 	#print (float)(pos)/count
 	#print (float)(neg)/count
 	#print (float)(neu)/count

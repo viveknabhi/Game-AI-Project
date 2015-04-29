@@ -12,8 +12,8 @@ mapping = {'bases':1,'towers':2,'obstacles':0}
 
 #Initilized constants
 POP_SIZE = 50
-GA_ITERATIONS = 50
-MUTATION_RATE = 40
+GA_ITERATIONS = 20
+MUTATION_RATE = 5
 adjMat = []
 trace_file_name = ''
 elitism = True
@@ -24,29 +24,37 @@ MAX_TOWER = 12
 MIN_OBSTACLE = 15
 MAX_OBSTACLE = 25
 
+MIN_FIRE_RATE = 10
+MAX_FIRE_RATE = 30
+DELTA_FIRE_RATE = 0.5
+
 
 #Class for each tour
 class MapLayout:
-	def __init__(s,mapRep,level,sentiment):
+	def __init__(s,mapRep,level,sentiment,baseFireRate):
 		s.mapRep = mapRep
 		#Modify to perform fitness function checks
 		s.towers = s.findCount(2)
 		s.obstacles = s.findCount(0)
 		s.bases = s.findCount(1)
-		s.sentimet = sentiment
+		s.sentiment = sentiment
 		s.level = level
+
+		s.baseFireRate = baseFireRate
 
 		s.towerIndices = s.findItems(2)
 		s.baseIndices = s.findItems(1)
 		#print s.baseIndices
 
 
-		s.TOWER_WEIGHT = 8
-		s.OBSTACLE_WEIGHT = 8
-		s.BASE_TOWER_DIST_WEIGHT = 5
+		s.TOWER_WEIGHT = 15
+		s.OBSTACLE_WEIGHT = 2
+		s.BASE_TOWER_DIST_WEIGHT = 15
+		s.HBASE_TOWER_DIST_WEIGHT = 5
 		s.BASE_BASE_DIST_WEIGHT = 20
+		s.FIRE_RATE_WEIGHT = 5
 
-		s.TOTAL_WEIGHT = s.TOWER_WEIGHT + s.OBSTACLE_WEIGHT + s.BASE_TOWER_DIST_WEIGHT + s.BASE_BASE_DIST_WEIGHT
+		s.TOTAL_WEIGHT = s.TOWER_WEIGHT + s.OBSTACLE_WEIGHT + s.BASE_TOWER_DIST_WEIGHT + s.BASE_BASE_DIST_WEIGHT + s.HBASE_TOWER_DIST_WEIGHT  + s.FIRE_RATE_WEIGHT
 
 		s.RANGE = int(s.TOTAL_WEIGHT/4)
 		s.MIN =  s.RANGE * s.level
@@ -84,7 +92,17 @@ class MapLayout:
 		score += (s.towers/MAX_TOWER) * s.TOWER_WEIGHT
 		score += (s.obstacles/MAX_OBSTACLE) * s.OBSTACLE_WEIGHT
 
-		groupDistance = 0
+		groupDistance = 0.1
+		for base in s.baseIndices:
+			if base == (0,0):
+				continue
+
+			for tower in s.towerIndices:
+				groupDistance += distance(base,tower)
+
+		score += (1/groupDistance) * s.BASE_TOWER_DIST_WEIGHT
+
+		groupDistance = 0.1
 		for base in s.baseIndices:
 			if base != (0,0):
 				continue
@@ -92,10 +110,16 @@ class MapLayout:
 			for tower in s.towerIndices:
 				groupDistance += distance(base,tower)
 
-		score += (groupDistance/(distance((9,9),(1,1)) * 10)) * s.BASE_TOWER_DIST_WEIGHT
-	
+		score += (groupDistance/(distance((9,9),(1,1)) * 10)) * s.HBASE_TOWER_DIST_WEIGHT	
 		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * s.BASE_BASE_DIST_WEIGHT
 
+		baseFireScore = 0
+		localFire = (s.baseFireRate - MIN_FIRE_RATE)/(MAX_FIRE_RATE- MIN_FIRE_RATE)
+		baseFireScore = abs(s.sentiment-localFire) * s.FIRE_RATE_WEIGHT
+
+		score += baseFireScore
+
+		print s.targetScore,score
 
 		return abs(score - s.targetScore)
 
@@ -197,8 +221,13 @@ class Population:
 		while i < s.maxSize:
 			i += 1
 			#mapRep = s.generateMapRepresentation()
+			baseFireRate = random.randint(MIN_FIRE_RATE,MAX_FIRE_RATE)
+
 			mapRep = s.generateMapRepresentationModified()
-			mapLayoutObj = MapLayout(mapRep,level,sentiment)
+			mapLayoutObj = MapLayout(mapRep,level,sentiment,baseFireRate)
+
+			
+
 			s.addTour(mapLayoutObj)
 			s.size += 1
 
@@ -223,8 +252,8 @@ class Population:
 	#Find the best crossover candidates based on tournament selection
 	def getCrossoverCandidate(s):
 		candidates = random.sample(s.listMapLayout,6)
-		cost,layout = s.getBestCost(candidates)
-		return layout
+		cost,tour = s.getBestCost(candidates)
+		return tour
 
 
 
@@ -240,7 +269,7 @@ class GeneticAlgorithm:
 	def findGALayout(s,iters):
 		i = 1
 		t1 = time.time()
-		cost,tour = s.p.getBestCost()
+		cost,tou = s.p.getBestCost()
 		print i,cost
 		best = cost
 
@@ -269,13 +298,13 @@ class GeneticAlgorithm:
 			i += 1
 			p1 = s.p.getCrossoverCandidate()
 			p2 = s.p.getCrossoverCandidate()
-			c1,c2,c1Dict,c2Dict = s.crossover(p1,p2)
+			c1,c2,c1Dict,c2Dict,bfr1,bfr2 = s.crossover(p1,p2)
 
-			c1 = s.mutate(c1,c1Dict)
-			c2 = s.mutate(c2,c2Dict)
+			c1,bfr1 = s.mutate(c1,c1Dict,bfr1)
+			c2,bfr2 = s.mutate(c2,c2Dict,bfr2)
 
-			mapLayoutObj1 = MapLayout(c1,s.level,s.sentiment)
-			mapLayoutObj2 = MapLayout(c2,s.level,s.sentiment)
+			mapLayoutObj1 = MapLayout(c1,s.level,s.sentiment,bfr1)
+			mapLayoutObj2 = MapLayout(c2,s.level,s.sentiment,bfr2)
 			newP.addTour(mapLayoutObj1)
 			#print i
 			newP.addTour(mapLayoutObj2)
@@ -284,8 +313,20 @@ class GeneticAlgorithm:
 
 
 	#Implementation of the 2-opt mutation
-	def mutate(s,layout,cDict):
+	def mutate(s,layout,cDict,bfr):
 		choiceArr = set([0,2,3])
+		if random.randint(1,100) < s.mutationRate:
+			if random.choice([0,1]) == 0:
+				bfr -= DELTA_FIRE_RATE
+			else:
+				bfr += DELTA_FIRE_RATE
+
+			if bfr > MAX_FIRE_RATE:
+				bfr = MAX_FIRE_RATE
+			elif bfr < MIN_FIRE_RATE:
+				bfr = MIN_FIRE_RATE
+
+
 		for i in xrange(layout.shape[0]):
 			for j in xrange(layout.shape[1]):
 				if layout[i][j] == 1:
@@ -306,7 +347,7 @@ class GeneticAlgorithm:
 
 					layout[i][j] = choice
 
-		return layout
+		return layout,bfr
 
 	def checkUpperBounds(s,countDict,val):
 		if val == 3:
@@ -397,8 +438,14 @@ class GeneticAlgorithm:
 			c2Dict[1] -= 1
 
 		#print c1Dict,c2Dict
+		bfr1 = p1.baseFireRate
+		bfr2 = p2.baseFireRate
+		ch = random.choice([1,2])
+		if ch == 2:
+			bfr1 = p2.baseFireRate
+			bfr2 = p1.baseFireRate
 
-		return child1,child2,c1Dict,c2Dict
+		return child1,child2,c1Dict,c2Dict,bfr1,bfr2
 
 
 def GA(level,sentiment):
@@ -408,8 +455,10 @@ def GA(level,sentiment):
 	np.random.seed(seed)
 	ga = GeneticAlgorithm(MUTATION_RATE,level,sentiment)
 	cost,layout = ga.findGALayout(GA_ITERATIONS)
-	print layout,cost
-	print layout.towers,layout.bases,layout.obstacles
+	
+	print layout.baseFireRate
+	# print layout,cost
+	# print layout.towers,layout.bases,layout.obstacles
 	#layout.mapRep = GH.modifyMapObstacles(layout.mapRep)
 	moba = TweetMoba()
-	moba.generateMOBA(layout.mapRep)
+	moba.generateMOBA(layout.mapRep,layout.baseFireRate)

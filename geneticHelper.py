@@ -159,16 +159,16 @@ class TweetMoba:
 		s.towerLocs = []
 		
 
-	def createBase(s, position):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
+	def createBase(s, position,fire):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
 		if position == (25,25):
-			b = Base(BASE, position, s.world, 1, MyHumanMinion, heroType = None)
+			b = Base(BASE, position, s.world, 1, MyHumanMinion, heroType = None,firerate = fire)
 		else:
 			b = Base(BASE, position, s.world, 3, heroType = None, minionType = None)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
 		b.setNavigator(s.nav)
 		s.world.addBase(b)
 
-	def createTower(s, location):
-		t = Tower(TOWER, location, s.world, 2)
+	def createTower(s, location,fire):
+		t = Tower(TOWER, location, s.world, 2, firerate=fire)
 		s.world.addTower(t)
 
 	def createObstacle(s, x, y, size, i,j):
@@ -343,7 +343,7 @@ class TweetMoba:
 				t11 = Tower(TOWER, (towerX, towerY), world, 1)
 				world.addTower(t11)
 
-	def generateMOBA(s,A):
+	def generateMOBA(s,A,fireRate):
 		#getGameWorldObject(towerCount=6, baseCount=1, obstacleCount=3, x2list, y2list)
 		x2list, y2list = s.getGridCoordinates()
 		#A = generateMapRepresentation()
@@ -385,9 +385,9 @@ class TweetMoba:
 		s.nav.setWorld(s.world)
 
 		for location in s.baseLocs:
-			s.createBase(location)
+			s.createBase(location,fireRate)
 		for location in s.towerLocs:
-			s.createTower(location)
+			s.createTower(location,fireRate)
 		#hero1.start()
 		#hero2.start()
 		s.world.run()

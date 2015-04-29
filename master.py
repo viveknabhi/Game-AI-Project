@@ -44,6 +44,8 @@ def main():
 	similarity = computeSimilarity([mobaDoc,userDoc])
 
 	###WRITE LOGIC TO CONVERT FROM SIMILARITY TO LEVEL!!!
+	#if similarity < 0.6:
+	#	return 0
 	level = 0
 	print "######### Difficulty Level Selected - " + difficultyLevel[level] + " #########"
 	raw_input()
