@@ -3,6 +3,7 @@ import cPickle
 import time
 from configFile import *
 from processTweets import *
+import time
 
 
 def generateTweepyObject():
@@ -44,7 +45,7 @@ def getTweetsforUser(username,fileName):
 	statuses = []
 	tweets = []
 	count = 0
-
+	t1 = time.time()
 	while True:
 		try:
 			status = statusIterator.next()
@@ -56,6 +57,10 @@ def getTweetsforUser(username,fileName):
 		except:
 			cPickle.dump(statuses, pickleFile)
 			if count < 100:
+				return
+
+			t2 = time.time()
+			if t2 - t1 > 300:
 				return
 
 			if count > 2000:

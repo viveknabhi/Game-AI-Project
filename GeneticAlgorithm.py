@@ -27,16 +27,34 @@ MAX_OBSTACLE = 25
 
 #Class for each tour
 class MapLayout:
-	def __init__(s,mapRep):
+	def __init__(s,mapRep,level,sentiment):
 		s.mapRep = mapRep
 		#Modify to perform fitness function checks
 		s.towers = s.findCount(2)
 		s.obstacles = s.findCount(0)
 		s.bases = s.findCount(1)
+		s.sentimet = sentiment
+		s.level = level
 
 		s.towerIndices = s.findItems(2)
 		s.baseIndices = s.findItems(1)
 		#print s.baseIndices
+
+
+		s.TOWER_WEIGHT = 8
+		s.OBSTACLE_WEIGHT = 8
+		s.BASE_TOWER_DIST_WEIGHT = 5
+		s.BASE_BASE_DIST_WEIGHT = 20
+
+		s.TOTAL_WEIGHT = s.TOWER_WEIGHT + s.OBSTACLE_WEIGHT + s.BASE_TOWER_DIST_WEIGHT + s.BASE_BASE_DIST_WEIGHT
+
+		s.RANGE = int(s.TOTAL_WEIGHT/4)
+		s.MIN =  s.RANGE * s.level
+		s.MAX = s.MIN + s.RANGE
+
+		s.targetScore = (s.MAX+s.MIN)/2
+		#print s.targetScore
+
 		try:
 			assert s.bases == 2
 			assert s.towers <= MAX_TOWER
@@ -61,9 +79,10 @@ class MapLayout:
 		return len([a for a in np.nditer(s.mapRep) if a == item])
 
 	def computeMapFitness(s):
+
 		score = 0
-		score += (s.towers/MAX_TOWER) * 8
-		score += (s.obstacles/MAX_OBSTACLE) * 2
+		score += (s.towers/MAX_TOWER) * s.TOWER_WEIGHT
+		score += (s.obstacles/MAX_OBSTACLE) * s.OBSTACLE_WEIGHT
 
 		groupDistance = 0
 		for base in s.baseIndices:
@@ -73,12 +92,12 @@ class MapLayout:
 			for tower in s.towerIndices:
 				groupDistance += distance(base,tower)
 
-		score += (groupDistance/(distance((9,9),(1,1)) * 10)) * 5
+		score += (groupDistance/(distance((9,9),(1,1)) * 10)) * s.BASE_TOWER_DIST_WEIGHT
 	
-		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * 20
+		score +=(distance(s.baseIndices[0],s.baseIndices[1])/(distance((9,9),(1,1)) * 10)) * s.BASE_BASE_DIST_WEIGHT
 
 
-		return abs(score - 5)
+		return abs(score - s.targetScore)
 
 
 
@@ -173,14 +192,13 @@ class Population:
 
 		return mapRep
 
-	def createPopulation(s):
+	def createPopulation(s,level,sentiment):
 		i = 0
 		while i < s.maxSize:
-			print i
 			i += 1
 			#mapRep = s.generateMapRepresentation()
 			mapRep = s.generateMapRepresentationModified()
-			mapLayoutObj = MapLayout(mapRep)
+			mapLayoutObj = MapLayout(mapRep,level,sentiment)
 			s.addTour(mapLayoutObj)
 			s.size += 1
 
@@ -212,10 +230,12 @@ class Population:
 
 #Implementation of the Genetic Algorithm class
 class GeneticAlgorithm:
-	def __init__(s,mutationRate):
+	def __init__(s,mutationRate,level,sentiment):
 		s.p = Population(POP_SIZE)
-		s.p.createPopulation()
+		s.p.createPopulation(level,sentiment)
 		s.mutationRate = mutationRate
+		s.level = level
+		s.sentiment = sentiment
 
 	def findGALayout(s,iters):
 		i = 1
@@ -254,8 +274,8 @@ class GeneticAlgorithm:
 			c1 = s.mutate(c1,c1Dict)
 			c2 = s.mutate(c2,c2Dict)
 
-			mapLayoutObj1 = MapLayout(c1)
-			mapLayoutObj2 = MapLayout(c2)
+			mapLayoutObj1 = MapLayout(c1,s.level,s.sentiment)
+			mapLayoutObj2 = MapLayout(c2,s.level,s.sentiment)
 			newP.addTour(mapLayoutObj1)
 			#print i
 			newP.addTour(mapLayoutObj2)
@@ -383,9 +403,10 @@ class GeneticAlgorithm:
 
 def GA(level,sentiment):
 	cost = 0
-	random.seed(20)
-	np.random.seed(90)
-	ga = GeneticAlgorithm(MUTATION_RATE)
+	seed = random.randint(0,100)
+	random.seed(seed)
+	np.random.seed(seed)
+	ga = GeneticAlgorithm(MUTATION_RATE,level,sentiment)
 	cost,layout = ga.findGALayout(GA_ITERATIONS)
 	print layout,cost
 	print layout.towers,layout.bases,layout.obstacles
