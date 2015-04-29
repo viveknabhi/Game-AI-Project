@@ -12,7 +12,7 @@ mapping = {'bases':1,'towers':2,'obstacles':0}
 
 #Initilized constants
 POP_SIZE = 50
-GA_ITERATIONS = 20
+GA_ITERATIONS = 50
 MUTATION_RATE = 5
 adjMat = []
 trace_file_name = ''
@@ -119,7 +119,7 @@ class MapLayout:
 
 		score += baseFireScore
 
-		print s.targetScore,score
+		#print s.targetScore,score
 
 		return abs(score - s.targetScore)
 
@@ -270,7 +270,7 @@ class GeneticAlgorithm:
 		i = 1
 		t1 = time.time()
 		cost,tou = s.p.getBestCost()
-		print i,cost
+		#print i,cost
 		best = cost
 
 		while i < iters:
@@ -281,7 +281,7 @@ class GeneticAlgorithm:
 			#t = time.time()-t1
 			if cost < best:
 				best = cost 
-			print i,cost#,tour.path
+			#print i,cost#,tour.path
 		#print time.time() - t1
 		return cost,tour
 
@@ -453,12 +453,12 @@ def GA(level,sentiment):
 	seed = random.randint(0,100)
 	random.seed(seed)
 	np.random.seed(seed)
+	print 'Seed - ', str(seed)
 	ga = GeneticAlgorithm(MUTATION_RATE,level,sentiment)
 	cost,layout = ga.findGALayout(GA_ITERATIONS)
-	
-	print layout.baseFireRate
-	# print layout,cost
-	# print layout.towers,layout.bases,layout.obstacles
-	#layout.mapRep = GH.modifyMapObstacles(layout.mapRep)
+	print "########## Statistics ##############"
+	print 'Fire - ' + str(layout.baseFireRate)
+	print 'Tower Count - ' + str(layout.towers)
+	print 'Obstacle Count - ' + str(layout.obstacles)
 	moba = TweetMoba()
 	moba.generateMOBA(layout.mapRep,layout.baseFireRate)

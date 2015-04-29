@@ -44,15 +44,21 @@ def main():
 	similarity = computeSimilarity([mobaDoc,userDoc])
 
 	###WRITE LOGIC TO CONVERT FROM SIMILARITY TO LEVEL!!!
-	#if similarity < 0.6:
-	#	return 0
-	level = 0
+	if similarity >= 0.12:
+		level = 3
+	elif similarity<0.12 and similarity>0.095:
+		level = 2
+	elif similarity<=0.095 and similarity>0.07:
+		level = 1
+	else:
+		level = 0
+
 	print "######### Difficulty Level Selected - " + difficultyLevel[level] + " #########"
 	raw_input()
 
 	#COMPLETE IMPLEMENTATION OF THIS FUNCTION
 	sentiment = computeSentiment(userDoc)
-	print "######### User tweet sentiment acertained #########"
+	print "######### User tweet sentiment found #########"
 	raw_input()
 
 	print "######### Running Generic Algorithm for map generation #########"

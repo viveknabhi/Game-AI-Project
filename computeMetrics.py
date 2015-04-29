@@ -6,7 +6,7 @@ def computeSimilarity(documents):
 	tfidf = TfidfVectorizer().fit_transform(documents)
 	# no need to normalize, since Vectorizer will return normalized tf-idf
 	pairwise_similarity = tfidf * tfidf.T
-	#print pairwise_similarity.A[0][1]
+	#print pairwise_similarity.A
 	return pairwise_similarity.A[0][1]
 
 
