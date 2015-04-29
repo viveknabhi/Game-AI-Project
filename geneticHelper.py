@@ -343,14 +343,7 @@ class TweetMoba:
 				t11 = Tower(TOWER, (towerX, towerY), world, 1)
 				world.addTower(t11)
 
-	def cutDownObstacles(s,A):
-		j=0
-		for i in xrange(A.shape[0]):
-			if A[i,j]==0:
-
-		return A
 	def generateMOBA(s,A):
-		A = s.cutDownObstacles(A)
 		#getGameWorldObject(towerCount=6, baseCount=1, obstacleCount=3, x2list, y2list)
 		x2list, y2list = s.getGridCoordinates()
 		#A = generateMapRepresentation()
