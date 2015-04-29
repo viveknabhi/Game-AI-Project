@@ -171,12 +171,37 @@ class TweetMoba:
 		t = Tower(TOWER, location, s.world, 2)
 		s.world.addTower(t)
 
-	def createObstacle(s, x, y, size):
+	def createObstacle(s, x, y, size, i,j):
 		offset = s.bigCellsize/2# - s.cellsize
-		topLeft = (x - offset, y - offset)
-		topRight = (x + size*s.bigCellsize + offset, y - offset)
-		bottomRight = (x + size*s.bigCellsize + offset, y + size*s.bigCellsize + offset)
-		bottomLeft = (x - offset, y + size*s.bigCellsize + offset)
+		offset2 = s.bigCellsize/2 - s.cellsize
+
+		if j==0:
+			topLeft = (x - offset, y - offset2)
+			topRight = (x + size*s.bigCellsize + offset, y - offset2)
+		else:
+			topLeft = (x - offset, y - offset)
+			topRight = (x + size*s.bigCellsize + offset, y - offset)
+
+		if i==9:
+			topRight = (x + size*s.bigCellsize + offset2, y - offset)
+			bottomRight = (x + size*s.bigCellsize + offset2, y + size*s.bigCellsize + offset)
+		else:
+			topRight = (x + size*s.bigCellsize + offset, y - offset)
+			bottomRight = (x + size*s.bigCellsize + offset, y + size*s.bigCellsize + offset)
+
+		if j==9:
+			bottomRight = (x + size*s.bigCellsize + offset, y + size*s.bigCellsize + offset2)
+			bottomLeft = (x - offset, y + size*s.bigCellsize + offset2)
+		else:
+			bottomRight = (x + size*s.bigCellsize + offset, y + size*s.bigCellsize + offset)
+			bottomLeft = (x - offset, y + size*s.bigCellsize + offset)
+
+		if i==0:
+			topLeft = (x - offset2, y - offset)
+			bottomLeft = (x - offset2, y + size*s.bigCellsize + offset)
+		else:
+			topLeft = (x - offset, y - offset)
+			bottomLeft = (x - offset, y + size*s.bigCellsize + offset)
 
 		obstacle = [topLeft, topRight, bottomRight, bottomLeft]
 		return obstacle
@@ -208,7 +233,7 @@ class TweetMoba:
 		for i,x in enumerate(x2list):
 			for j,y in enumerate(y2list):
 				if A[i,j] == 0:
-					obstacles.append(s.createObstacle(x,y,0))
+					obstacles.append(s.createObstacle(x,y,0,i,j))
 				elif A[i,j] == 1:
 					if i==0 and j==0:
 						#s.createBase(BASE, (x, y), 1)#, WanderingHumanMinion, MyHumanHero, BUILDRATE, 1000)
@@ -318,10 +343,7 @@ class TweetMoba:
 				t11 = Tower(TOWER, (towerX, towerY), world, 1)
 				world.addTower(t11)
 
-	
-
 	def generateMOBA(s,A):
-
 		#getGameWorldObject(towerCount=6, baseCount=1, obstacleCount=3, x2list, y2list)
 		x2list, y2list = s.getGridCoordinates()
 		#A = generateMapRepresentation()
