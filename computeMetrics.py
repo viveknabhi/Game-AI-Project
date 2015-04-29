@@ -1,5 +1,6 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
-
+import pickle
+from nltk.stem.porter import PorterStemmer as ps
 
 def computeSimilarity(documents):
 	tfidf = TfidfVectorizer().fit_transform(documents)
@@ -11,8 +12,29 @@ def computeSimilarity(documents):
 
 
 def computeSentiment(document):
-	return 0.3
-	pass
+	senti=pickle.load(open('sentiWordNet.p'))
+	updatedSenti = {}
+	stemmer = ps()
+	for word in senti:
+		updatedSenti[stemmer.stem(word[:-2])]=senti[word]
+
+	pos = 0
+	neg = 0
+	neu = 0
+	count = 0
+	for word in document.split():
+		if word in updatedSenti:
+			pos += updatedSenti[word]['posScore']
+			#neg += updatedSenti[word]['negScore']
+			#neu += updatedSenti[word]['neuScore']
+			count += 1
+		else:
+			print word
+	#print (float)(pos)/count
+	#print (float)(neg)/count
+	#print (float)(neu)/count
+	return (float)(pos)/count
+
 
 
 
