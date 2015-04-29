@@ -68,6 +68,6 @@ def getTweetsforUser(username,fileName):
 
 
 
-username = 'SUNSfanTV'
-getTweetsforUser(username,username+'.p')
-processStatuses(username+'.p',username+'.out')
+# username = 'SUNSfanTV'
+# getTweetsforUser(username,username+'.p')
+# processStatuses(username+'.p',username+'.out')

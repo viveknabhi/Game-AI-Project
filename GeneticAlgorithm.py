@@ -381,8 +381,7 @@ class GeneticAlgorithm:
 		return child1,child2,c1Dict,c2Dict
 
 
-def GA():
-
+def GA(level,sentiment):
 	cost = 0
 	random.seed(20)
 	np.random.seed(90)
@@ -393,5 +392,3 @@ def GA():
 	#layout.mapRep = GH.modifyMapObstacles(layout.mapRep)
 	moba = TweetMoba()
 	moba.generateMOBA(layout.mapRep)
-
-GA()
