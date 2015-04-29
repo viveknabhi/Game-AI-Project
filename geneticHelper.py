@@ -107,10 +107,10 @@ def modifyMapObstacles(mapRep):
 ###########################
 ### Minion Subclasses
 #BaselineMinion
-class MyHumanMinion(class1):
+class MyHumanMinion(BaselineMinion):
 	
 	def __init__(self, position, orientation, world, image = NPC, speed = SPEED, viewangle = 360, hitpoints = HITPOINTS, firerate = FIRERATE, bulletclass = SmallBullet):
-		class1.__init__(self, position, orientation, world, image, speed, viewangle, hitpoints, firerate, bulletclass)
+		BaselineMinion.__init__(self, position, orientation, world, image, speed, viewangle, hitpoints, firerate, bulletclass)
 
 
 """
@@ -149,12 +149,10 @@ class TweetMoba:
 		#s.world = GameWorld(SEED, dims, dims)
 
 		#s.agent = GhostAgent(AGENT, (600, 500), 1, SPEED, s.world)
-		s.agent = Hero((SCREEN[0]/2, SCREEN[1]/2), 0, s.world)
-		s.agent.team = 0
-		s.world.setPlayerAgent(s.agent)
+		s.agentTemp = Hero((SCREEN[0]/2, SCREEN[1]/2), 0, s.world)
 
 		s.cellFactor = 3
-		s.cellsize = s.agent.getRadius()*2.0
+		s.cellsize = s.agentTemp.getRadius()*2.0
 		s.bigCellsize = s.cellFactor*s.cellsize
 
 		s.baseLocs = []
@@ -163,7 +161,7 @@ class TweetMoba:
 
 	def createBase(s, position):#, minionType, heroType, buildrate = BUILDRATE, hitpoints = BASEHITPOINTS, firerate = BASEFIRERATE, bulletclass = BaseBullet):
 		if position == (25,25):
-			b = Base(BASE, position, s.world, 1, MyHumanMinion)
+			b = Base(BASE, position, s.world, 1, MyHumanMinion, heroType = None)
 		else:
 			b = Base(BASE, position, s.world, 2, heroType = None, minionType = None)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
 		b.setNavigator(s.nav)
@@ -309,6 +307,12 @@ class TweetMoba:
 		#A = generateMapRepresentation()
 		s.parseArrayRepresentation(A, x2list, y2list)
 		#world.initializeTerrain(obstacles, (0, 0, 0), 4)
+
+
+		s.agent = Hero((125, 125), 0, s.world)
+		s.agent.team = 1
+		s.world.setPlayerAgent(s.agent)
+
 
 		s.agent.setNavigator(Navigator())
 		s.world.debugging = True
