@@ -449,6 +449,8 @@ class Tower(Mover):
 			minions = sorted(minions, key=lambda x: distance(self.getLocation(), x.getLocation()))
 			heros = sorted(heros, key=lambda x: distance(self.getLocation(), x.getLocation()))
 			targets = minions + heros
+			print targets
+			print len(targets)
 			if len(targets) > 0:
 				self.turnToFace(targets[0].getLocation())
 				self.shoot()

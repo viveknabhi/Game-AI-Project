@@ -163,7 +163,7 @@ class TweetMoba:
 		if position == (25,25):
 			b = Base(BASE, position, s.world, 1, MyHumanMinion, heroType = None)
 		else:
-			b = Base(BASE, position, s.world, 2, heroType = None, minionType = None)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
+			b = Base(BASE, position, s.world, 3, heroType = None, minionType = None)#, minionType, heroType, buildrate, hitpoints, firerate, bulletclass)
 		b.setNavigator(s.nav)
 		s.world.addBase(b)
 
